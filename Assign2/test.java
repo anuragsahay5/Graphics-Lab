@@ -1,6 +1,7 @@
 import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.Math.*;
 
 public class test extends Applet implements ActionListener {
 
@@ -9,12 +10,48 @@ public class test extends Applet implements ActionListener {
   private Button ZoomOut = new Button("ZoomOut");
   private int gwidth = 0;
 
+  public double abs(double inp) {
+    if (inp < 0) {
+      return -inp;
+    }
+    return inp;
+  }
+
   public void plotPoint(int x, int y, Color c) {
     int ox = (getX() + getWidth()) / 2;
     int oy = (getY() + getHeight()) / 2;
     Graphics g = getGraphics();
     g.setColor(c);
     g.fillOval(ox + x * gwidth - (4 * unit), oy - y * gwidth - (4 * unit), 8 * unit, 8 * unit);
+  }
+
+  public void plotLineDDA(double initialX, double initialY, double finalX, double finalY) {
+    double dx = finalX - initialX, dy = finalY - initialY, step;
+    if (abs(dy) > abs(dx)) {
+      step = dy;
+    } else {
+      step = dx;
+    }
+
+
+    plotPoint((int)initialX, (int)initialY, Color.red);
+    double xinc = dx / step, yinc = dy / step;
+    if(initialX<initialY){
+      while ((initialX < finalX)) {
+        initialX += xinc;
+        initialY += yinc;
+        plotPoint((int)initialX, (int)initialY, Color.red);
+      }
+    }
+    else{
+      while ((initialX > finalX)) {
+        initialX += xinc;
+        initialY += yinc;
+        plotPoint((int)initialX, (int)initialY, Color.red);
+      }
+    }
+    
+
   }
 
   public void init() {
@@ -32,7 +69,7 @@ public class test extends Applet implements ActionListener {
   public void paint(Graphics g) {
     /*----- Grid Plottiong */
     int length = 400 * unit;
-    int width = 25 * unit;
+    int width = 10 * unit;
     gwidth = width;
     int looplen = (length / width) * 2;
 
@@ -47,7 +84,6 @@ public class test extends Applet implements ActionListener {
     int plotnum = -(length / width);
 
     for (int i = 0; i <= looplen; i++) {
-      /*------ Plotting Grid Lines ------*/
       g.drawLine(
           ox - length + width * i,
           oy + length + width,
@@ -60,26 +96,22 @@ public class test extends Applet implements ActionListener {
           oy - length + width * i);
     }
 
-    /* ------ Plooting co-ordinates ------ */
     for (int i = 0; i <= looplen; i++) {
       g.setColor(Color.black);
       g.drawString(String.valueOf(plotnum), ox - length + width * i, oy);
       g.drawString(String.valueOf(-plotnum), ox, oy - length + width * i);
       plotnum++;
     }
-
-    /*------ Plooting Axes Lines ------*/
     g.setColor(Color.black);
     g.drawLine(ox, oy + length + width, ox, oy - length - width);
     g.drawLine(ox - length - width, oy, ox + length + width, oy);
 
-    /* ------ Origin Plot ------ */
-    g.setColor(Color.blue);
+    g.setColor(Color.red);
     g.fillOval(ox - (2 * unit), oy - (2 * unit), 4 * unit, 4 * unit);
 
     /*------Point Plot----*/
-    int x = 2, y = 3;
-    plotPoint(x, y, Color.red);
+
+    plotLineDDA(0, 1, 4, 8);
   }
 
   public void actionPerformed(ActionEvent e) {
@@ -91,4 +123,5 @@ public class test extends Applet implements ActionListener {
       unit /= 2;
     paint(g);
   }
+
 }
